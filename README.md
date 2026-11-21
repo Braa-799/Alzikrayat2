@@ -109,3 +109,27 @@ npm run dev
 Advanced Web Technologies
 
 Alzikrayat - MERN Edition
+
+## Selected Advanced Track
+
+**Track A: JWT-Based Authentication**
+
+This track was selected to implement secure, stateless authentication using JSON Web Tokens (JWT).
+
+### Implementation
+
+- User passwords are hashed using bcryptjs before being stored.
+- JWT tokens are generated after successful registration and login.
+- Tokens are verified by authentication middleware.
+- Protected endpoints require a valid Bearer token.
+- Axios is used for API requests.
+- An Axios request interceptor automatically attaches the JWT token to outgoing requests.
+- Logout clears the stored authentication token.
+- Users can delete only their own photos.
+
+### Security and Configuration
+
+- The JWT secret is stored in the server `.env` file.
+- Environment variables and sensitive credentials are excluded from Git.
+- JWT tokens expire after 7 days.
+
