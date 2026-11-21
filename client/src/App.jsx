@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
+import api from "./api";
 
-const API = "http://localhost:5000/api";
 const IMAGE_URL = "http://localhost:5000/uploads/";
 
 function App() {
@@ -70,14 +70,8 @@ function AuthPage({ mode, setUser }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API}/auth/${mode}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Request failed");
+      const response = await api.post(`/auth/${mode}`, form);
+      const data = response.data;
 
       const account = data.user || data;
       const loggedUser = {
@@ -135,13 +129,9 @@ function Gallery() {
   const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
-    fetch(`${API}/photos`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Could not load photos");
-        return res.json();
-      })
-      .then(setPhotos)
-      .catch((err) => setError(err.message))
+    api.get("/photos")
+      .then((response) => setPhotos(response.data))
+      .catch((err) => setError(err.response?.data?.message || err.message || "Could not load photos"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -211,13 +201,7 @@ function UploadPage({ user }) {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API}/photos/upload`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("alzikrayatToken")}` },
-        body: formData
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Upload failed");
+      await api.post("/photos/upload", formData);
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -255,9 +239,8 @@ function PhotoDetails({ user }) {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    fetch(`${API}/photos`)
-      .then((res) => res.json())
-      .then((photos) => setPhoto(photos.find((item) => item._id === id) || null))
+    api.get("/photos")
+      .then((response) => setPhoto(response.data.find((item) => item._id === id) || null))
       .catch(() => setError("Could not load photo"));
 
     loadComments();
@@ -265,10 +248,8 @@ function PhotoDetails({ user }) {
 
   const loadComments = async () => {
     try {
-      const response = await fetch(`${API}/photos/${id}/comments`);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Could not load comments");
-      setComments(data);
+      const response = await api.get(`/photos/${id}/comments`);
+      setComments(response.data);
     } catch (err) {
       setError(err.message);
     }
@@ -279,19 +260,9 @@ function PhotoDetails({ user }) {
     if (!comment.trim() || !user) return;
 
     try {
-      const response = await fetch(`${API}/photos/${id}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("alzikrayatToken")}`
-        },
-        body: JSON.stringify({ comment })
-      });
+      const response = await api.post(`/photos/${id}/comments`, { comment });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Could not add comment");
-
-      setComments((current) => [...current, data.comment]);
+      setComments((current) => [...current, response.data.comment]);
       setComment("");
       setError("");
     } catch (err) {
@@ -304,15 +275,7 @@ function PhotoDetails({ user }) {
 
     setDeleting(true);
     try {
-      const response = await fetch(`${API}/photos/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("alzikrayatToken")}`
-        }
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Could not delete photo");
+      await api.delete(`/photos/${id}`);
 
       navigate("/");
     } catch (err) {
@@ -365,6 +328,14 @@ function PhotoDetails({ user }) {
 }
 
 export default App;
+
+
+
+
+
+
+
+
 
 
 
