@@ -7,7 +7,8 @@ const router = express.Router();
 
 const {
   getPhotos,
-  uploadPhoto
+  uploadPhoto,
+  deletePhoto
 } = require("../controllers/photoController");
 
 const {
@@ -41,6 +42,7 @@ const upload = multer({
 
 router.get("/", getPhotos);
 router.post("/upload", upload.single("photo"), uploadPhoto);
+router.delete("/:id", deletePhoto);
 router.get("/:id/comments", getComments);
 router.post("/:id/comments", addComment);
 
