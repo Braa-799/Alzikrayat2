@@ -5,6 +5,8 @@ const crypto = require("crypto");
 
 const router = express.Router();
 
+const { protect } = require("../middleware/authMiddleware");
+
 const {
   getPhotos,
   uploadPhoto,
@@ -41,9 +43,9 @@ const upload = multer({
 });
 
 router.get("/", getPhotos);
-router.post("/upload", upload.single("photo"), uploadPhoto);
-router.delete("/:id", deletePhoto);
+router.post("/upload", protect, upload.single("photo"), uploadPhoto);
+router.delete("/:id", protect, deletePhoto);
 router.get("/:id/comments", getComments);
-router.post("/:id/comments", addComment);
+router.post("/:id/comments", protect, addComment);
 
 module.exports = router;

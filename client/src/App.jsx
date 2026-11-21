@@ -16,6 +16,7 @@ function App() {
 
   const logout = () => {
     localStorage.removeItem("alzikrayatUser");
+    localStorage.removeItem("alzikrayatToken");
     setUser(null);
   };
 
@@ -85,7 +86,9 @@ function AuthPage({ mode, setUser }) {
       };
 
       if (!loggedUser.id) throw new Error("User ID was not returned");
+      if (!data.token) throw new Error("Authentication token was not returned");
 
+      localStorage.setItem("alzikrayatToken", data.token);
       localStorage.setItem("alzikrayatUser", JSON.stringify(loggedUser));
       setUser(loggedUser);
       navigate("/");
@@ -205,12 +208,12 @@ function UploadPage({ user }) {
     formData.append("photo", photo);
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("userId", user.id);
 
     setLoading(true);
     try {
       const response = await fetch(`${API}/photos/upload`, {
         method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("alzikrayatToken")}` },
         body: formData
       });
       const data = await response.json();
@@ -278,8 +281,11 @@ function PhotoDetails({ user }) {
     try {
       const response = await fetch(`${API}/photos/${id}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ comment, userId: user.id })
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("alzikrayatToken")}`
+        },
+        body: JSON.stringify({ comment })
       });
 
       const data = await response.json();
@@ -300,8 +306,9 @@ function PhotoDetails({ user }) {
     try {
       const response = await fetch(`${API}/photos/${id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id })
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("alzikrayatToken")}`
+        }
       });
 
       const data = await response.json();
@@ -358,7 +365,6 @@ function PhotoDetails({ user }) {
 }
 
 export default App;
-
 
 
 

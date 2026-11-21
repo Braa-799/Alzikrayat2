@@ -7,7 +7,9 @@ const getComments = async (req, res) => {
     const photo = await Photo.findById(req.params.id);
 
     if (!photo) {
-      return res.status(404).json({ message: "Photo not found" });
+      return res.status(404).json({
+        message: "Photo not found"
+      });
     }
 
     const comments = await Comment.find({ photoId: req.params.id })
@@ -25,22 +27,29 @@ const getComments = async (req, res) => {
 
 const addComment = async (req, res) => {
   try {
-    const { comment, userId } = req.body;
+    const { comment } = req.body;
+    const userId = req.user.userId;
 
-    if (!comment || !comment.trim() || !userId) {
+    if (!comment || !comment.trim()) {
       return res.status(400).json({
-        message: "Comment and user ID are required"
+        message: "Comment is required"
       });
     }
 
     const photo = await Photo.findById(req.params.id);
+
     if (!photo) {
-      return res.status(404).json({ message: "Photo not found" });
+      return res.status(404).json({
+        message: "Photo not found"
+      });
     }
 
     const user = await User.findById(userId);
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found"
+      });
     }
 
     const newComment = await Comment.create({
