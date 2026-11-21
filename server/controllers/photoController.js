@@ -17,7 +17,8 @@ const getPhotos = async (req, res) => {
 
 const uploadPhoto = async (req, res) => {
   try {
-    const { title, description, userId } = req.body;
+    const { title, description } = req.body;
+    const userId = req.user.userId;
 
     if (!req.file) {
       return res.status(400).json({
@@ -25,16 +26,16 @@ const uploadPhoto = async (req, res) => {
       });
     }
 
-    if (!title || !userId) {
+    if (!title || !title.trim()) {
       return res.status(400).json({
-        message: "Title and user ID are required"
+        message: "Title is required"
       });
     }
 
     const photo = await Photo.create({
       userId,
       fileName: req.file.filename,
-      title,
+      title: title.trim(),
       description: description || "",
       dateTime: new Date()
     });
@@ -53,7 +54,7 @@ const uploadPhoto = async (req, res) => {
 
 const deletePhoto = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.user.userId;
 
     const photo = await Photo.findById(req.params.id);
 
